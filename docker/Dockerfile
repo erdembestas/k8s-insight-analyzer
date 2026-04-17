@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-LABEL maintainer="your-email@example.com"
+LABEL maintainer="erdembestas@users.noreply.github.com"
 
 WORKDIR /opt/k8s-insight-analyzer
 

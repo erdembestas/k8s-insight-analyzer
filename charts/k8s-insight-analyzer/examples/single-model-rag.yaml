@@ -3,7 +3,7 @@
 # Replace with your published image before install.
 replicaCount: 1
 image:
-  repository: "" # Set to your published image (e.g. ghcr.io/username/ops-analyzer)
+  repository: "ghcr.io/erdembestas/k8s-insight-analyzer" # Set to your published image (e.g. ghcr.io/erdembestas/k8s-insight-analyzer)
   tag: "0.1.0"
 mode:
   type: deployment

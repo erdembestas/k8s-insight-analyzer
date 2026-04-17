@@ -4,10 +4,10 @@
 replicaCount: 1
 
 image:
-  # Set this to your published image repository (e.g. ghcr.io/<username>/k8s-insight-analyzer)
+  # Set this to your published image repository (e.g. ghcr.io/erdembestas/k8s-insight-analyzer)
   # Leaving empty forces the user to explicitly set the image when installing.
-  repository: ""
-  tag: "latest"
+  repository: "ghcr.io/erdembestas/k8s-insight-analyzer"
+  tag: "0.1.0"
   pullPolicy: IfNotPresent
 
 mode:

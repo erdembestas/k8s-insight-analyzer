@@ -3,7 +3,7 @@ set -euo pipefail
 
 if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <image-repo> <tag>"
-  echo "Example: $0 ghcr.io/username/k8s-insight-analyzer 0.1.0"
+  echo "Example: $0 ghcr.io/erdembestas/k8s-insight-analyzer 0.1.0"
   exit 1
 fi
 

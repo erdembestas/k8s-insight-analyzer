@@ -297,7 +297,7 @@ clusters:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your-username/k8s-insight-analyzer.git
+   git clone https://github.com/erdembestas/k8s-insight-analyzer.git
    cd k8s-insight-analyzer
    ```
 
@@ -324,7 +324,7 @@ clusters:
 1. **Pull the published image:**
 
    ```bash
-   docker pull ghcr.io/your-username/k8s-insight-analyzer:0.1.0
+   docker pull ghcr.io/erdembestas/k8s-insight-analyzer:0.1.0
    ```
 
 2. **Or build locally:**
@@ -337,14 +337,14 @@ clusters:
 1. **Add Helm repository:**
 
    ```bash
-   helm repo add your-org https://your-org.github.io/helm-charts
+   helm repo add erdembestas https://erdembestas.github.io/helm-charts
    helm repo update
    ```
 
 2. **Install the chart:**
    ```bash
-   helm install k8s-insight-analyzer your-org/k8s-insight-analyzer \
-     --set image.repository=ghcr.io/your-username/k8s-insight-analyzer \
+   helm install k8s-insight-analyzer erdembestas/k8s-insight-analyzer \
+     --set image.repository=ghcr.io/erdembestas/k8s-insight-analyzer \
      --set image.tag="0.1.0" \
      --set llm.apiTokenSecretName=your-llm-secret
    ```
@@ -501,7 +501,7 @@ export LLM_MODEL="gpt-4"
      -e LLM_API_TOKEN="your-token" \
      -v ~/.kube/config:/root/.kube/config \
      -v ./artifacts:/opt/k8s-insight-analyzer/artifacts \
-     ghcr.io/your-username/k8s-insight-analyzer:0.1.0
+     ghcr.io/erdembestas/k8s-insight-analyzer:0.1.0
    ```
 
 2. **Run with mounted configuration:**
@@ -510,7 +510,7 @@ export LLM_MODEL="gpt-4"
      -v ./vars:/opt/k8s-insight-analyzer/vars \
      -v ./inventories:/opt/k8s-insight-analyzer/inventories \
      -v ~/.kube/config:/root/.kube/config \
-     ghcr.io/your-username/k8s-insight-analyzer:0.1.0 \
+     ghcr.io/erdembestas/k8s-insight-analyzer:0.1.0 \
      ansible-playbook playbooks/analyze_fleet.yml -i inventories/production/hosts.yml
    ```
 
@@ -539,7 +539,7 @@ docker run --rm -e MOCK_LLM=1 -e LLM_API_TOKEN=dummy \
 
 2. **Use the publish helper:**
    ```bash
-   ./docker/publish.sh ghcr.io/your-username/k8s-insight-analyzer 0.1.0
+   ./docker/publish.sh ghcr.io/erdembestas/k8s-insight-analyzer 0.1.0
    ```
 
 #### To Docker Hub
@@ -560,7 +560,7 @@ docker push your-dockerhub-username/k8s-insight-analyzer:0.1.0
    ```yaml
    # values.yaml
    image:
-     repository: ghcr.io/your-username/k8s-insight-analyzer
+     repository: ghcr.io/erdembestas/k8s-insight-analyzer
      tag: "0.1.0"
    ```
 
@@ -657,7 +657,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
 1. **Fork and clone:**
 
    ```bash
-   git clone https://github.com/your-username/k8s-insight-analyzer.git
+   git clone https://github.com/erdembestas/k8s-insight-analyzer.git
    cd k8s-insight-analyzer
    ```
 
