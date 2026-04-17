@@ -1,0 +1,11 @@
+# Example inventory for single-machine runs
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+
+# Define clusters to analyze here (example):
+# clusters:
+#   - name: example-cluster-1
+#     context: example-cluster-1-admin
+#     platform: kubernetes

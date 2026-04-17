@@ -1,0 +1,19 @@
+# Example values: single model with RAG
+# NOTE: image.repository is intentionally blank in values.yaml by default.
+# Replace with your published image before install.
+replicaCount: 1
+image:
+  repository: "" # Set to your published image (e.g. ghcr.io/username/ops-analyzer)
+  tag: "0.1.0"
+mode:
+  type: deployment
+llm:
+  mode: single
+  apiUrl: "" # Set to your LLM API URL
+  apiTokenSecretName: ops-llm-token
+  model: gpt-4
+rag:
+  enabled: true
+  knowledgeVolume:
+    enabled: true
+    configMapName: ops-runbooks

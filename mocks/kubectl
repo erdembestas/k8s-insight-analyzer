@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Simple kubectl mock that returns canned outputs for expected commands
+cmd="$@"
+
+if [[ "$cmd" == *"config get-contexts"*"-o"*"name"* ]]; then
+  # Return known contexts for inventory
+  echo "demo-cluster-1-admin"
+  echo "demo-openshift-1-admin"
+  exit 0
+fi
+
+if [[ "$cmd" == *"version"*"-o"*"json"* ]]; then
+  cat <<'JSON'
+{"serverVersion": {"gitVersion": "v1.26.0"}}
+JSON
+  exit 0
+fi
+
+if [[ "$cmd" == *"get nodes"*"-o"*"json"* ]]; then
+  cat <<'JSON'
+{"items": [{"metadata": {"name": "node1", "labels": {"node-role.kubernetes.io/master": ""}}, "status": {"conditions": [{"type": "Ready", "status": "True"}]}}]}
+JSON
+  exit 0
+fi
+
+if [[ "$cmd" == *"get ns"*"-o"*"json"* ]]; then
+  cat <<'JSON'
+{"items": [{"metadata": {"name": "default"}}, {"metadata": {"name": "kube-system"}}]}
+JSON
+  exit 0
+fi
+
+if [[ "$cmd" == *"get pods"*"-A"*"-o"*"json"* ]]; then
+  cat <<'JSON'
+{"items": [{"metadata": {"namespace": "default", "name": "pod-a"}, "status": {"phase": "Running", "containerStatuses": [{"restartCount": 0}]}}, {"metadata": {"namespace": "default", "name": "pod-b"}, "status": {"phase": "CrashLoopBackOff", "containerStatuses": [{"restartCount": 5, "state": {"waiting": {"reason": "CrashLoopBackOff"}}}]}}]}
+JSON
+  exit 0
+fi
+
+if [[ "$cmd" == *"get events"*"-A"*"type=Warning"*"-o"*"json"* ]]; then
+  cat <<'JSON'
+{"items": []}
+JSON
+  exit 0
+fi
+
+if [[ "$cmd" == *"top nodes"*"--no-headers"* ]]; then
+  # name cpu cpu% memory memory%
+  echo "node1 100m 5% 512Mi 10%"
+  exit 0
+fi
+
+if [[ "$cmd" == *"top pods"*"-A"*"--no-headers"* ]]; then
+  echo "default pod-a 50m 64Mi"
+  exit 0
+fi
+
+# default fallback
+echo ""
+exit 0

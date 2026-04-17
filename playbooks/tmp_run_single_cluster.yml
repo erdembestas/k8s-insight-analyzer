@@ -1,0 +1,55 @@
+- name: Run pipeline for a single cluster (mocked)
+  hosts: localhost
+  gather_facts: false
+
+  pre_tasks:
+    - name: Ensure artifact directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ artifacts_dir }}"
+        - "{{ artifacts_dir }}/raw"
+        - "{{ artifacts_dir }}/normalized"
+        - "{{ artifacts_dir }}/llm"
+        - "{{ artifacts_dir }}/reports"
+        - "{{ artifacts_dir }}/rag"
+
+  tasks:
+    - name: Run pipeline for demo-cluster-1
+      block:
+        - name: Collect raw snapshot for {{ cluster.name }}
+          include_role:
+            name: collect_cluster_snapshot
+          vars:
+            target_cluster: "{{ cluster }}"
+
+        - name: Normalize snapshot for {{ cluster.name }}
+          include_role:
+            name: normalize_snapshot
+          vars:
+            target_cluster: "{{ cluster }}"
+
+        - name: Retrieve relevant runbooks (RAG) for {{ cluster.name }}
+          include_role:
+            name: retrieve_context
+          vars:
+            target_cluster: "{{ cluster }}"
+
+        - name: Call LLM for {{ cluster.name }}
+          include_role:
+            name: call_llm
+          vars:
+            target_cluster: "{{ cluster }}"
+
+        - name: Render Markdown report for {{ cluster.name }}
+          include_role:
+            name: render_report
+          vars:
+            target_cluster: "{{ cluster }}"
+      vars:
+        cluster:
+          name: demo-cluster-1
+          context: demo-cluster-1-admin
+          platform: kubernetes

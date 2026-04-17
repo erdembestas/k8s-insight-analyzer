@@ -1,0 +1,31 @@
+---
+# Kube contexts to inspect.
+clusters:
+  - name: demo-cluster-1
+    context: demo-cluster-1-admin
+    platform: kubernetes
+  - name: demo-openshift-1
+    context: demo-openshift-1-admin
+    platform: openshift
+
+artifacts_dir: "{{ playbook_dir }}/../artifacts"
+
+# OpenAI-compatible endpoint
+llm_api_url: "{{ lookup('env', 'LLM_API_URL') }}"
+llm_api_token: "{{ lookup('env', 'LLM_API_TOKEN') }}"
+llm_model: "{{ lookup('env', 'LLM_MODEL') | default('gpt-4.1-mini', true) }}"
+
+# Collection bounds
+max_warning_events: 40
+max_top_pods: 25
+max_top_nodes: 10
+max_namespaces: 50
+max_restart_records: 25
+
+# Optional redaction settings
+redact_cluster_names: false
+redact_node_names: false
+
+# LLM behavior
+llm_temperature: 0
+llm_timeout_seconds: 120

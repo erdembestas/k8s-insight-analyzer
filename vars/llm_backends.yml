@@ -1,0 +1,28 @@
+---
+# Example LLM backends configuration. Place provider-specific settings here.
+llm_backends:
+  primary:
+    name: primary_openai
+    provider: openai
+    base_url: "https://api.openai.com/v1/chat/completions"
+    auth_env: LLM_API_TOKEN
+    models:
+      analysis: gpt-4.1-mini
+      embeddings: text-embedding-3-small
+    timeout: 120
+    retries: 1
+    fallback: fallback_http
+
+  fallback_http:
+    name: fallback_http
+    provider: http
+    base_url: "https://example-llm-gateway.local/v1/generate"
+    auth_env: LLM_API_TOKEN
+    models:
+      analysis: small-llm
+      embeddings: small-embed
+    timeout: 60
+    retries: 0
+
+# mode: single | multi | gateway
+llm_mode: gateway

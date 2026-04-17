@@ -1,0 +1,6 @@
+Cluster name: {{ normalized_payload.cluster_name }}
+Platform: {{ normalized_payload.platform }}
+Collected at: {{ normalized_payload.collected_at }}
+
+Structured telemetry JSON:
+{{ normalized_payload | to_nice_json }}

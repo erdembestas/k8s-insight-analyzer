@@ -1,0 +1,46 @@
+---
+- name: Build telemetry-only prompt or RAG prompt
+  ansible.builtin.set_fact:
+    llm_user_prompt: >-
+      {% set _rc = rag_context | default([]) %}
+      {% if _rc | length > 0 %}
+      {{ lookup('template', playbook_dir ~ '/../templates/llm_prompt_rag.j2') }}
+      {% else %}
+      {{ lookup('template', playbook_dir ~ '/../templates/llm_prompt_telemetry.j2') }}
+      {% endif %}
+
+- name: Write prompt file
+  ansible.builtin.copy:
+    dest: "{{ artifacts_dir }}/llm/{{ target_cluster.name }}.prompt.txt"
+    content: "{{ llm_user_prompt }}"
+    mode: "0644"
+
+- name: Call LLM gateway
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_dir }}/../scripts/llm_gateway.py"
+      - --prompt-file
+      - "{{ artifacts_dir }}/llm/{{ target_cluster.name }}.prompt.txt"
+      - --normalized
+      - "{{ artifacts_dir }}/normalized/{{ target_cluster.name }}.json"
+      - --rag
+      - "{{ artifacts_dir }}/rag/{{ target_cluster.name }}.json"
+      - --backends
+      - "{{ playbook_dir }}/../vars/llm_backends.yml"
+      - --output-raw
+      - "{{ artifacts_dir }}/llm/{{ target_cluster.name }}.json"
+      - --output-parsed
+      - "{{ artifacts_dir }}/llm/{{ target_cluster.name }}.parsed.json"
+      - --task
+      - analysis
+  changed_when: false
+
+- name: Read parsed LLM JSON
+  ansible.builtin.slurp:
+    src: "{{ artifacts_dir }}/llm/{{ target_cluster.name }}.parsed.json"
+  register: llm_parsed_b64
+
+- name: Set llm_result fact
+  ansible.builtin.set_fact:
+    llm_result: "{{ (llm_parsed_b64.content | b64decode | from_json) if (llm_parsed_b64 is defined and llm_parsed_b64.content is defined) else {'general_health': 'Unable to parse model response', 'critical_findings': [], 'risk_level': 'medium', 'recommended_actions': [], 'missing_data': ['Response parsing failed']} }}"

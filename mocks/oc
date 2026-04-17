@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# minimal oc mock
+cmd="$@"
+if [[ "$cmd" == *"get clusteroperators"*"-o"*"json"* ]]; then
+  cat <<'JSON'
+{"items": []}
+JSON
+  exit 0
+fi
+# fallback: noop
+echo ""
+exit 0

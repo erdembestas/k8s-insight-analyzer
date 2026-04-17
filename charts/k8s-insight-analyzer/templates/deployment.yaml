@@ -1,0 +1,54 @@
+{{- if eq .Values.mode.type "deployment" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8s-insight-analyzer.fullname" . }}
+  labels:
+    {{- include "k8s-insight-analyzer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "k8s-insight-analyzer.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "k8s-insight-analyzer.fullname" . }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | default (include "k8s-insight-analyzer.fullname" .) }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 6 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 6 }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      affinity: {{ toYaml .Values.affinity | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: k8s-insight-analyzer
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args: ["/usr/local/bin/entrypoint.sh"]
+          env:
+            - name: MOCK_LLM
+              value: "{{ index .Values.env 0 "value" | default "0" }}"
+            - name: LLM_MODE
+              value: "{{ .Values.llm.mode }}"
+          {{- if .Values.llm.apiTokenSecretName }}
+            - name: LLM_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.llm.apiTokenSecretName }}
+                  key: token
+          {{- end }}
+          resources: {{ toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/k8s-insight-analyzer/config
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "k8s-insight-analyzer.fullname" . }}-config
+{{- end }}

@@ -1,0 +1,46 @@
+# Cluster Health Report: {{ target_cluster.name }}
+
+- Platform: {{ normalized_payload.platform }}
+- Collected at: {{ normalized_payload.collected_at }}
+- Kubernetes server version: {{ normalized_payload.kubernetes.server_version | default('unknown') }}
+- Node health: {{ normalized_payload.summary.ready_nodes }}/{{ normalized_payload.summary.total_nodes }} Ready
+- Pending pods: {{ normalized_payload.summary.pending_pods }}
+- CrashLoop-like pods: {{ normalized_payload.summary.crashloop_like_pods }}
+- Total restarts counted: {{ normalized_payload.summary.total_restarts }}
+- Risk level: **{{ llm_result.risk_level | upper }}**
+
+## General Health
+{{ llm_result.general_health }}
+
+## Critical Findings
+{% if llm_result.critical_findings | length > 0 %}
+{% for item in llm_result.critical_findings %}
+- {{ item }}
+{% endfor %}
+{% else %}
+- No critical findings returned by the model.
+{% endif %}
+
+## Recommended Actions
+{% if llm_result.recommended_actions | length > 0 %}
+{% for item in llm_result.recommended_actions | sort(attribute='priority') %}
+{{ item.priority }}. {{ item.action }}
+   - Reason: {{ item.reason }}
+{% endfor %}
+{% else %}
+- No recommended actions returned by the model.
+{% endif %}
+
+## Missing Data / Confidence Notes
+{% if llm_result.missing_data | length > 0 %}
+{% for item in llm_result.missing_data %}
+- {{ item }}
+{% endfor %}
+{% else %}
+- None reported.
+{% endif %}
+
+## Snapshot Summary
+```json
+{{ normalized_payload.summary | to_nice_json }}
+```

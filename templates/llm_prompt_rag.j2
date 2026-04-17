@@ -1,0 +1,16 @@
+Cluster name: {{ normalized_payload.cluster_name }}
+Platform: {{ normalized_payload.platform }}
+Collected at: {{ normalized_payload.collected_at }}
+
+Structured telemetry JSON:
+{{ normalized_payload | to_nice_json }}
+
+Retrieved runbook context (most relevant):
+{% for r in rag_context %}
+- path: {{ r.path }}
+  score: {{ r.score }}
+  snippet: |
+    {{ r.snippet }}
+{% endfor %}
+
+Please analyze the telemetry in the context of the retrieved runbooks and return a strict JSON object with keys: general_health, critical_findings, risk_level, recommended_actions, missing_data, related_runbooks.

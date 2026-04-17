@@ -1,0 +1,6 @@
+---
+- name: Render cluster Markdown report
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/report.md.j2"
+    dest: "{{ artifacts_dir }}/reports/{{ target_cluster.name }}.md"
+    mode: "0644"

@@ -1,0 +1,86 @@
+# Default values for k8s-insight-analyzer
+# Users should override these in their own values.yaml or via -f
+
+replicaCount: 1
+
+image:
+  # Set this to your published image repository (e.g. ghcr.io/<username>/k8s-insight-analyzer)
+  # Leaving empty forces the user to explicitly set the image when installing.
+  repository: ""
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+mode:
+  # deployment or cronjob
+  type: deployment
+  # schedule used when mode.type == cronjob
+  schedule: "0 2 * * *"
+
+serviceAccount:
+  create: true
+  name: ""
+
+rbac:
+  create: false
+  # If true, chart will create a Role and RoleBinding with namespace read-only permissions
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# LLM / Gateway configuration
+llm:
+  mode: single # single | gateway
+  # single-provider env based
+  apiUrl: ""
+  apiTokenSecretName: "" # reference to a Kubernetes Secret containing token
+  model: "gpt-4.1-mini"
+  temperature: 0
+  timeoutSeconds: 120
+
+# Gateway mode points to a ConfigMap/Secret or external backend config
+gateway:
+  backendConfigMap: "" # name of ConfigMap containing gateway config (optional)
+
+# RAG
+rag:
+  enabled: false
+  knowledgeVolume:
+    enabled: false
+    configMapName: "" # optional pre-created configmap with runbooks
+
+# Targets: list of clusters contexts to manage (optional)
+targets:
+  enabled: false
+  clusters: []
+
+# Persistence for artifacts (optional PVC)
+persistence:
+  enabled: false
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+# Entrypoint/command args
+command: []
+env:
+  - name: MOCK_LLM
+    value: "0"
+
+# Prompts and template configuration
+promptsConfigMap: ""
+
+# Ingress (optional)
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: ["/"]
+  tls: []
+
+# Example node permissions note: nodes access may require cluster-scoped roles
+createClusterRoleForNodes: false

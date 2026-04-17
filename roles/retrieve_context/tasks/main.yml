@@ -1,0 +1,28 @@
+---
+- name: Ensure rag artifacts dir exists
+  ansible.builtin.file:
+    path: "{{ artifacts_dir }}/rag"
+    state: directory
+    mode: "0755"
+
+- name: Run retrieval against local runbooks
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_dir }}/../scripts/retrieve_context.py"
+      - --normalized
+      - "{{ artifacts_dir }}/normalized/{{ target_cluster.name }}.json"
+      - --knowledge-dir
+      - "{{ playbook_dir }}/../docs/runbooks"
+      - --output
+      - "{{ artifacts_dir }}/rag/{{ target_cluster.name }}.json"
+  changed_when: false
+
+- name: Read retrieved context
+  ansible.builtin.slurp:
+    src: "{{ artifacts_dir }}/rag/{{ target_cluster.name }}.json"
+  register: rag_context_b64
+
+- name: Expose rag_context fact
+  ansible.builtin.set_fact:
+    rag_context: "{{ (rag_context_b64.content | b64decode | from_json) if (rag_context_b64 is defined and rag_context_b64.content is defined) else [] }}"

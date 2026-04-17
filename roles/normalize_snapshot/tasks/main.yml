@@ -1,0 +1,47 @@
+---
+- name: Set normalization paths
+  ansible.builtin.set_fact:
+    raw_cluster_dir: "{{ artifacts_dir }}/raw/{{ target_cluster.name }}"
+    normalized_file: "{{ artifacts_dir }}/normalized/{{ target_cluster.name }}.json"
+
+- name: Normalize raw data with Python helper
+  vars:
+    _base_args:
+      - python3
+      - "{{ playbook_dir }}/../scripts/normalize_snapshot.py"
+      - "--cluster-name"
+      - "{{ target_cluster.name }}"
+      - "--platform"
+      - "{{ target_cluster.platform | default('kubernetes') }}"
+      - "--raw-dir"
+      - "{{ raw_cluster_dir }}"
+      - "--output"
+      - "{{ normalized_file }}"
+      - "--max-warning-events"
+      - "{{ max_warning_events | string }}"
+      - "--max-top-pods"
+      - "{{ max_top_pods | string }}"
+      - "--max-top-nodes"
+      - "{{ max_top_nodes | string }}"
+      - "--max-namespaces"
+      - "{{ max_namespaces | string }}"
+      - "--max-restart-records"
+      - "{{ max_restart_records | string }}"
+
+  ansible.builtin.set_fact:
+    normalize_argv: "{{ _base_args + (['--redact-cluster-names'] if redact_cluster_names | default(false) else []) + (['--redact-node-names'] if redact_node_names | default(false) else []) }}"
+
+- name: Run normalizer
+  ansible.builtin.shell: "{{ normalize_argv | join(' ') }}"
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: Read normalized payload back into Ansible
+  ansible.builtin.slurp:
+    src: "{{ normalized_file }}"
+  register: normalized_payload_b64
+
+- name: Expose normalized payload fact
+  ansible.builtin.set_fact:
+    normalized_payload: "{{ normalized_payload_b64.content | b64decode | from_json }}"

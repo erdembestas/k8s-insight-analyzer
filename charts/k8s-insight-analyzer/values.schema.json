@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "replicaCount": { "type": "integer", "minimum": 1 },
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": "string" },
+        "pullPolicy": { "type": "string" }
+      },
+      "required": ["repository"]
+    },
+    "mode": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["deployment", "cronjob"] },
+        "schedule": { "type": "string" }
+      }
+    },
+    "llm": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["single", "gateway"] },
+        "apiUrl": { "type": "string" },
+        "apiTokenSecretName": { "type": "string" },
+        "model": { "type": "string" }
+      }
+    },
+    "rag": { "type": "object" }
+  },
+  "required": ["image"]
+}

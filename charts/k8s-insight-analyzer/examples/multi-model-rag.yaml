@@ -1,0 +1,18 @@
+# Example values: gateway multi-model with RAG
+# NOTE: image.repository below is a placeholder. Replace with your published image
+replicaCount: 1
+image:
+  repository: "" # Set to your published image (e.g. ghcr.io/your-username/k8s-insight-analyzer)
+  tag: "0.1.0"
+mode:
+  type: cronjob
+  schedule: "0 1 * * *"
+llm:
+  mode: gateway
+gateway:
+  backendConfigMap: ops-llm-backends
+rag:
+  enabled: true
+  knowledgeVolume:
+    enabled: true
+    configMapName: ops-runbooks

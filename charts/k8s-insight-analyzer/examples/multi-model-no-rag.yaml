@@ -1,0 +1,14 @@
+# Example values: gateway mode with multiple backends, no RAG
+# NOTE: image.repository below is a placeholder. Replace with your published image
+replicaCount: 1
+image:
+  repository: "" # Set to your published image (e.g. ghcr.io/your-username/k8s-insight-analyzer)
+  tag: "0.1.0"
+mode:
+  type: deployment
+llm:
+  mode: gateway
+gateway:
+  backendConfigMap: ops-llm-backends
+rag:
+  enabled: false

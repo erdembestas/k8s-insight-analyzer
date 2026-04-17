@@ -1,0 +1,124 @@
+---
+- name: Set cluster artifact paths
+  ansible.builtin.set_fact:
+    raw_cluster_dir: "{{ artifacts_dir }}/raw/{{ target_cluster.name }}"
+
+- name: Ensure raw artifact directory exists
+  ansible.builtin.file:
+    path: "{{ raw_cluster_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Collect cluster version
+  ansible.builtin.command:
+    argv: [kubectl, --context, "{{ target_cluster.context }}", version, -o, json]
+  register: cluster_version_cmd
+  changed_when: false
+
+- name: Write cluster version
+  ansible.builtin.copy:
+    dest: "{{ raw_cluster_dir }}/version.json"
+    content: "{{ cluster_version_cmd.stdout }}"
+    mode: "0644"
+
+- name: Collect node list
+  ansible.builtin.command:
+    argv: [kubectl, --context, "{{ target_cluster.context }}", get, nodes, -o, json]
+  register: nodes_cmd
+  changed_when: false
+
+- name: Write node list
+  ansible.builtin.copy:
+    dest: "{{ raw_cluster_dir }}/nodes.json"
+    content: "{{ nodes_cmd.stdout }}"
+    mode: "0644"
+
+- name: Collect namespace list
+  ansible.builtin.command:
+    argv: [kubectl, --context, "{{ target_cluster.context }}", get, ns, -o, json]
+  register: namespaces_cmd
+  changed_when: false
+
+- name: Write namespace list
+  ansible.builtin.copy:
+    dest: "{{ raw_cluster_dir }}/namespaces.json"
+    content: "{{ namespaces_cmd.stdout }}"
+    mode: "0644"
+
+- name: Collect pods across all namespaces
+  ansible.builtin.command:
+    argv: [kubectl, --context, "{{ target_cluster.context }}", get, pods, -A, -o, json]
+  register: pods_cmd
+  changed_when: false
+
+- name: Write pods list
+  ansible.builtin.copy:
+    dest: "{{ raw_cluster_dir }}/pods.json"
+    content: "{{ pods_cmd.stdout }}"
+    mode: "0644"
+
+- name: Collect warning events
+  ansible.builtin.command:
+    argv: [kubectl, --context, "{{ target_cluster.context }}", get, events, -A, --field-selector, type=Warning, -o, json]
+  register: events_cmd
+  changed_when: false
+  failed_when: false
+
+- name: Write warning events
+  ansible.builtin.copy:
+    dest: "{{ raw_cluster_dir }}/events.json"
+    content: "{{ events_cmd.stdout | default('{\"items\": []}') }}"
+    mode: "0644"
+
+- name: Collect top nodes
+  ansible.builtin.shell: |
+    set -o pipefail
+    kubectl --context {{ target_cluster.context | quote }} top nodes --no-headers 2>/dev/null || true
+  args:
+    executable: /bin/bash
+  register: top_nodes_cmd
+  changed_when: false
+
+- name: Write top nodes output
+  ansible.builtin.copy:
+    dest: "{{ raw_cluster_dir }}/top_nodes.txt"
+    content: "{{ top_nodes_cmd.stdout }}"
+    mode: "0644"
+
+- name: Collect top pods across all namespaces
+  ansible.builtin.shell: |
+    set -o pipefail
+    kubectl --context {{ target_cluster.context | quote }} top pods -A --no-headers 2>/dev/null || true
+  args:
+    executable: /bin/bash
+  register: top_pods_cmd
+  changed_when: false
+
+- name: Write top pods output
+  ansible.builtin.copy:
+    dest: "{{ raw_cluster_dir }}/top_pods.txt"
+    content: "{{ top_pods_cmd.stdout }}"
+    mode: "0644"
+
+- name: Check whether oc is installed
+  ansible.builtin.command: which oc
+  register: oc_present
+  changed_when: false
+  failed_when: false
+
+- name: Collect OpenShift clusteroperators when applicable
+  ansible.builtin.command:
+    argv: [oc, --context, "{{ target_cluster.context }}", get, clusteroperators, -o, json]
+  register: clusteroperators_cmd
+  changed_when: false
+  failed_when: false
+  when:
+    - target_cluster.platform | lower == 'openshift'
+    - oc_present.rc == 0
+
+- name: Write clusteroperators output
+  ansible.builtin.copy:
+    dest: "{{ raw_cluster_dir }}/clusteroperators.json"
+    content: "{{ clusteroperators_cmd.stdout | default('{\"items\": []}') }}"
+    mode: "0644"
+  when: target_cluster.platform | lower == 'openshift'

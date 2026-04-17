@@ -1,0 +1,23 @@
+# Example group_vars for runbook
+clusters:
+  - name: example-cluster-1
+    context: example-cluster-1-admin
+    platform: kubernetes
+
+artifacts_dir: "{{ playbook_dir }}/../artifacts"
+
+# Optional: provide LLM via env or vars/llm_backends.yml
+llm_api_url: "{{ lookup('env', 'LLM_API_URL') }}"
+llm_api_token: "{{ lookup('env', 'LLM_API_TOKEN') }}"
+llm_model: "{{ lookup('env', 'LLM_MODEL') | default('gpt-4.1-mini', true) }}"
+
+# Collection bounds
+max_warning_events: 40
+max_top_pods: 25
+max_top_nodes: 10
+max_namespaces: 50
+max_restart_records: 25
+
+# Optional redaction
+redact_cluster_names: false
+redact_node_names: false

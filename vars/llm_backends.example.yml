@@ -1,0 +1,15 @@
+# Example multi-backend configuration for llm gateway (gateway mode)
+# Copy to vars/llm_backends.yml and update
+
+llm_mode: gateway
+backends:
+  - name: openai
+    type: openai
+    url: https://api.openai.com/v1
+    api_token_env: OPENAI_API_KEY
+    models:
+      analysis: gpt-4.1-mini
+      conversation: gpt-4o
+  - name: mock
+    type: mock
+    priority: fallback

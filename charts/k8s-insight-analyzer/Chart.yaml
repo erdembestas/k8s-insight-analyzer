@@ -1,0 +1,12 @@
+apiVersion: v2
+name: k8s-insight-analyzer
+description: "Helm chart to deploy the K8s Insight Analyzer as a runnable workload"
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - ansible
+  - kubernetes
+  - llm
+  - analyzer
+maintainers: []

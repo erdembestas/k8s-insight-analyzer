@@ -1,0 +1,28 @@
+{{- if eq .Values.mode.type "cronjob" }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "k8s-insight-analyzer.fullname" . }}
+  labels:
+    {{- include "k8s-insight-analyzer.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.mode.schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{ include "k8s-insight-analyzer.fullname" . }}
+        spec:
+          serviceAccountName: {{ .Values.serviceAccount.name | default (include "k8s-insight-analyzer.fullname" .) }}
+          containers:
+            - name: k8s-insight-analyzer
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command: ["/bin/sh", "-c"]
+              args: ["/usr/local/bin/entrypoint.sh"]
+              env:
+                - name: LLM_MODE
+                  value: "{{ .Values.llm.mode }}"
+          restartPolicy: OnFailure
+{{- end }}

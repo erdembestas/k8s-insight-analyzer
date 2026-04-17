@@ -1,0 +1,93 @@
+---
+- name: Analyze Kubernetes/OpenShift fleet health with an external LLM
+  hosts: localhost
+  gather_facts: false
+
+  pre_tasks:
+    - name: Ensure `kubectl` is installed
+      ansible.builtin.command:
+        argv: [which, kubectl]
+      register: kubectl_check
+      changed_when: false
+      failed_when: kubectl_check.rc != 0
+
+    - name: Verify cluster contexts exist
+      ansible.builtin.shell: |
+        set -o pipefail
+        kubectl config get-contexts -o name | grep -Fx "{{ item.context }}"
+      loop: "{{ clusters }}"
+      loop_control:
+        loop_var: item
+      register: context_check
+      changed_when: false
+      failed_when: context_check.rc != 0
+
+    - name: Check for `vars/llm_backends.yml` file
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/../vars/llm_backends.yml"
+      register: llm_backends_stat
+      changed_when: false
+
+    - name: Validate LLM settings or backends file
+      ansible.builtin.assert:
+        that:
+          - "(llm_backends_stat.stat.exists) or ((llm_api_url | default('') | length) > 0 and (llm_api_token | default('') | length) > 0)"
+        fail_msg: "Set LLM_API_URL and LLM_API_TOKEN, or provide vars/llm_backends.yml before running the playbook."
+
+    - name: Ensure artifact directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ artifacts_dir }}"
+        - "{{ artifacts_dir }}/raw"
+        - "{{ artifacts_dir }}/normalized"
+        - "{{ artifacts_dir }}/llm"
+        - "{{ artifacts_dir }}/reports"
+
+  tasks:
+    - name: Collect raw snapshot for each cluster
+      include_role:
+        name: collect_cluster_snapshot
+      vars:
+        target_cluster: "{{ item }}"
+      loop: "{{ clusters }}"
+      loop_control:
+        loop_var: item
+
+    - name: Normalize snapshot for each cluster
+      include_role:
+        name: normalize_snapshot
+      vars:
+        target_cluster: "{{ item }}"
+      loop: "{{ clusters }}"
+      loop_control:
+        loop_var: item
+
+    - name: Retrieve relevant runbooks (RAG) for each cluster
+      include_role:
+        name: retrieve_context
+      vars:
+        target_cluster: "{{ item }}"
+      loop: "{{ clusters }}"
+      loop_control:
+        loop_var: item
+
+    - name: Call LLM for each cluster
+      include_role:
+        name: call_llm
+      vars:
+        target_cluster: "{{ item }}"
+      loop: "{{ clusters }}"
+      loop_control:
+        loop_var: item
+
+    - name: Render Markdown report for each cluster
+      include_role:
+        name: render_report
+      vars:
+        target_cluster: "{{ item }}"
+      loop: "{{ clusters }}"
+      loop_control:
+        loop_var: item
