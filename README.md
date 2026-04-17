@@ -177,8 +177,6 @@ clusters:
 
 ## Repository Structure
 
-## Repository Structure
-
 ### Core Files
 
 - **`ansible.cfg`** - Ansible configuration with YAML output format and collection paths
@@ -284,7 +282,7 @@ clusters:
 
 ## Prerequisites
 
-- **Python 3.8+** - Required for scripts and Ansible
+- **Python 3.11+** - Required for scripts and Ansible
 - **Ansible 2.14+** (or ansible-core 2.15+) - For orchestration
 - **`kubectl`** or **`oc`** - For real cluster collection (not needed for dry-run)
 - **`helm`** - For chart linting and template tests (optional)
@@ -579,21 +577,21 @@ docker push your-dockerhub-username/k8s-insight-analyzer:0.1.0
 
 ### Configuration Options
 
-| Parameter                | Description                          | Default    |
-| ------------------------ | ------------------------------------ | ---------- |
-| `image.repository`       | Container image repository           | `""`       |
-| `image.tag`              | Container image tag                  | `"latest"` |
-| `llm.mode`               | LLM mode: `single` or `gateway`      | `"single"` |
-| `llm.apiUrl`             | LLM API URL                          | `""`       |
-| `llm.apiTokenSecretName` | Kubernetes secret name for API token | `""`       |
-| `rag.enabled`            | Enable RAG retrieval                 | `false`    |
-| `persistence.enabled`    | Enable PVC for artifacts             | `false`    |
+| Parameter                | Description                          | Default                                  |
+| ------------------------ | ------------------------------------ | ---------------------------------------- |
+| `image.repository`       | Container image repository           | `"ghcr.io/erdembestas/k8s-insight-analyzer"` |
+| `image.tag`              | Container image tag                  | `"0.1.0"`                               |
+| `llm.mode`               | LLM mode: `single` or `gateway`      | `"single"`                               |
+| `llm.apiUrl`             | LLM API URL                          | `""`                                     |
+| `llm.apiTokenSecretName` | Kubernetes secret name for API token | `""`                                     |
+| `rag.enabled`            | Enable RAG retrieval                 | `false`                                  |
+| `persistence.enabled`    | Enable PVC for artifacts             | `false`                                  |
 
 ### Examples
 
 - **Single model with RAG:** `charts/k8s-insight-analyzer/examples/single-model-rag.yaml`
-- **Gateway mode:** `charts/k8s-insight-analyzer/examples/gateway-mode.yaml`
-- **CronJob deployment:** `charts/k8s-insight-analyzer/examples/cronjob-schedule.yaml`
+- **Multi-model gateway:** `charts/k8s-insight-analyzer/examples/multi-model-no-rag.yaml`
+- **CronJob deployment:** `charts/k8s-insight-analyzer/examples/cronjob-mode.yaml`
 
 ## Security & Privacy
 
